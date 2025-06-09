@@ -12,7 +12,7 @@ const hasCustomIcon = fs.existsSync(iconPath);
 const mb = menubar({
   index: 'http://localhost:3000', // Point to Next.js dev server
   icon: hasCustomIcon ? iconPath : undefined, // Use custom icon if available
-  tooltip: 'Counter App',
+  tooltip: 'Key Automation',
   browserWindow: {
     width: 300,
     height: 350,
@@ -33,37 +33,21 @@ const mb = menubar({
     vibrancy: 'popover' // macOS specific
   },
   preloadWindow: true,
-  showDockIcon: false
+  showDockIcon: false,
+  windowPosition: 'trayCenter'
 });
 
 mb.on('ready', () => {
   console.log('Menubar app is ready');
-  
-  // Optional: Add tray menu
+
+  // Remove the default context menu and set click behavior
   const { Menu } = require('electron');
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Show Counter',
-      click: () => {
-        mb.showWindow();
-      }
-    },
-    {
-      label: 'Hide Counter', 
-      click: () => {
-        mb.hideWindow();
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Quit',
-      click: () => {
-        mb.app.quit();
-      }
-    }
-  ]);
+  mb.tray.setContextMenu(null);
   
-  mb.tray.setContextMenu(contextMenu);
+  // Only show window on click (both left and right click)
+  mb.tray.on('click', () => {
+    mb.showWindow();
+  });
 });
 
 mb.on('after-create-window', () => {
