@@ -4,6 +4,36 @@ const path = require('path');
 const fs = require('fs');
 const robot = require('robotjs');
 
+// Configure robot for better performance and reliability
+robot.setKeyboardDelay(100); // Increased delay for testing
+
+// Test function to verify robotjs functionality
+function testRobotKeys() {
+  console.log('Testing robotjs key commands...');
+  try {
+    // Test individual key presses first
+    console.log('Testing command key...');
+    robot.keyToggle('command', 'down');
+    robot.keyToggle('command', 'up');
+    
+    console.log('Testing enter key...');
+    robot.keyTap('enter');
+    
+    // Test combined press
+    console.log('Testing command+enter combination...');
+    robot.keyToggle('command', 'down');
+    setTimeout(() => {
+      robot.keyTap('enter');
+      setTimeout(() => {
+        robot.keyToggle('command', 'up');
+        console.log('Key test complete');
+      }, 100);
+    }, 100);
+  } catch (error) {
+    console.error('RobotJS test failed:', error);
+  }
+}
+
 // Check if custom icon exists, otherwise use default
 const iconPath = path.join(__dirname, 'assets', 'iconTemplate.png');
 const hasCustomIcon = fs.existsSync(iconPath);
@@ -39,6 +69,9 @@ const mb = menubar({
 
 mb.on('ready', () => {
   console.log('Menubar app is ready');
+  
+  // Test robotjs functionality
+  setTimeout(testRobotKeys, 2000);
 
   // Remove the default context menu and set click behavior
   const { Menu } = require('electron');
@@ -92,15 +125,34 @@ ipcMain.handle('start-automation', () => {
   }
   
   isRunning = true;
+  mb.hideWindow();
+  
+  console.log('Starting automation sequence...');
+  
+  // Start the automation with more detailed debugging
   automationInterval = setInterval(() => {
     try {
-      // Press Cmd + Enter
-      robot.keyTap('enter', 'command');
-      console.log('Pressed Cmd + Enter');
+      console.log('Attempting to send Cmd+Enter...');
+      
+      // More controlled key sequence with delays
+      robot.keyToggle('command', 'down');
+      console.log('Command key down');
+      
+      setTimeout(() => {
+        robot.keyTap('enter');
+        console.log('Enter key pressed');
+        
+        setTimeout(() => {
+          robot.keyToggle('command', 'up');
+          console.log('Command key up');
+        }, 50);
+      }, 50);
+      
     } catch (error) {
-      console.error('Error pressing keys:', error);
+      console.error('Detailed error in key automation:', error);
+      console.error('Error stack:', error.stack);
     }
-  }, 3000); // Every 3 seconds
+  }, 3000);
   
   console.log('Started automation - pressing Cmd + Enter every 3 seconds');
   return { success: true, message: 'Automation started' };
