@@ -35,10 +35,41 @@ fi
 
 echo "✅ Dependencies installed successfully!"
 echo ""
-echo "🎯 To run the app:"
-echo "1. In Terminal 1, run: cd nextjs-ui && npm run dev"
-echo "2. In Terminal 2, run: cd electron && npm run dev"
+echo "🚀 Starting the application..."
 echo ""
+
+# Start Next.js dev server in background
+echo "📱 Starting Next.js development server..."
+cd nextjs-ui && npm run dev &
+NEXTJS_PID=$!
+
+# Wait a moment for Next.js to start
+sleep 3
+
+# Start Electron app
+echo "⚡ Starting Electron app..."
+cd ../electron && npm run dev &
+ELECTRON_PID=$!
+
+echo ""
+echo "✅ Application started successfully!"
 echo "📱 Look for the menubar icon in your macOS menubar!"
-echo "🖱️ Click the icon to open the counter app"
-echo "🖱️ Right-click the icon for menu options"
+echo "🖱️ Click the icon to open the automation app"
+echo ""
+echo "🛑 To stop the application, press Ctrl+C"
+
+# Function to cleanup processes on exit
+cleanup() {
+    echo ""
+    echo "🛑 Stopping application..."
+    kill $NEXTJS_PID 2>/dev/null
+    kill $ELECTRON_PID 2>/dev/null
+    echo "✅ Application stopped"
+    exit 0
+}
+
+# Trap interrupt signal to cleanup processes
+trap cleanup INT
+
+# Wait for user to interrupt
+wait

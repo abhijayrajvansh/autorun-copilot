@@ -1,6 +1,8 @@
 const { menubar } = require('menubar');
+const { ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const robot = require('robotjs');
 
 // Check if custom icon exists, otherwise use default
 const iconPath = path.join(__dirname, 'assets', 'iconTemplate.png');
@@ -16,7 +18,8 @@ const mb = menubar({
     height: 350,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
     resizable: false,
     minimizable: false,
@@ -93,3 +96,47 @@ if (process.env.NODE_ENV === 'development') {
     // mb.window.webContents.openDevTools({ mode: 'detach' });
   });
 }
+
+// Automation state
+let automationInterval = null;
+let isRunning = false;
+
+// IPC handlers for automation
+ipcMain.handle('start-automation', () => {
+  if (isRunning) {
+    return { success: false, message: 'Automation is already running' };
+  }
+  
+  isRunning = true;
+  automationInterval = setInterval(() => {
+    try {
+      // Press Cmd + Enter
+      robot.keyTap('enter', 'command');
+      console.log('Pressed Cmd + Enter');
+    } catch (error) {
+      console.error('Error pressing keys:', error);
+    }
+  }, 3000); // Every 3 seconds
+  
+  console.log('Started automation - pressing Cmd + Enter every 3 seconds');
+  return { success: true, message: 'Automation started' };
+});
+
+ipcMain.handle('stop-automation', () => {
+  if (!isRunning) {
+    return { success: false, message: 'Automation is not running' };
+  }
+  
+  if (automationInterval) {
+    clearInterval(automationInterval);
+    automationInterval = null;
+  }
+  
+  isRunning = false;
+  console.log('Stopped automation');
+  return { success: true, message: 'Automation stopped' };
+});
+
+ipcMain.handle('get-automation-status', () => {
+  return { isRunning };
+});
