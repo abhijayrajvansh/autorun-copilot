@@ -3,6 +3,9 @@
 # macOS Menubar Counter App - Development Runner
 echo "🚀 Starting macOS Menubar Counter App..."
 
+# Get the project root directory
+PROJECT_ROOT=$(pwd)
+
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
     echo "❌ Node.js is not installed. Please install Node.js first."
@@ -19,7 +22,7 @@ echo "📦 Installing dependencies..."
 
 # Install Next.js dependencies
 echo "Installing Next.js dependencies..."
-cd nextjs-ui && npm install
+cd "$PROJECT_ROOT/nextjs-ui" && npm install
 if [ $? -ne 0 ]; then
     echo "❌ Failed to install Next.js dependencies"
     exit 1
@@ -27,7 +30,7 @@ fi
 
 # Install Electron dependencies
 echo "Installing Electron dependencies..."
-cd ../electron && npm install
+cd "$PROJECT_ROOT/electron" && npm install
 if [ $? -ne 0 ]; then
     echo "❌ Failed to install Electron dependencies"
     exit 1
@@ -40,7 +43,7 @@ echo ""
 
 # Start Next.js dev server in background
 echo "📱 Starting Next.js development server..."
-cd nextjs-ui && npm run dev &
+cd "$PROJECT_ROOT/nextjs-ui" && npm run dev &
 NEXTJS_PID=$!
 
 # Wait a moment for Next.js to start
@@ -48,7 +51,7 @@ sleep 3
 
 # Start Electron app
 echo "⚡ Starting Electron app..."
-cd ../electron && npm run dev &
+cd "$PROJECT_ROOT/electron" && npm run dev &
 ELECTRON_PID=$!
 
 echo ""
